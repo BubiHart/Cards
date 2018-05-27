@@ -2,7 +2,9 @@
 #include <stdlib.h>
 
 void greetings(void);
-void play(void);
+void game(void);
+void initialize_deck(void);
+void translate(int counter, int face, int suit, int player);
 int random(int n);
 
 int main()
@@ -18,11 +20,16 @@ void greetings(void)
 
     switch(choice)
     {
-        case 1:play();break;
+        case 1:game();break;
     }
 }
 
-void play(void)
+void game(void)
+{
+    initialize_deck();
+}
+
+void initialize_deck(void)
 {
     system("cls");
     srand(time(NULL));
@@ -66,9 +73,59 @@ void play(void)
        {
         card_deck[counter][1] = suit;
        }
+
+       card_deck[counter][2] = 0;
    }
 
+   for(counter = 1;counter <= players_amount;counter++)
+   {
+       for(counter_player_cards = 1;counter_player_cards <= card_per_player;counter_player_cards++)
+       {
+           do
+           {
+             rand_number = random(rand_max-rand_min+1) + rand_min;
+             fflush(stdin);
+           }
+           while(card_deck[rand_number][2] != 0);
 
+           card_deck[rand_number][2] = counter;
+       }
+
+   }
+    for(counter = 0;counter < 36;counter++)
+    {
+        translate(counter, card_deck[counter][0], card_deck[counter][1], card_deck[counter][2]);
+    }
+
+
+}
+
+void translate(int counter, int face, int suit, int player)
+{
+
+
+  printf("%d\t", counter);
+  switch(face)
+  {
+      case 6:printf("Six\t\t");break;
+      case 7:printf("Seven\t\t");break;
+      case 8:printf("Eight\t\t");break;
+      case 9:printf("Ten\t\t");break;
+      case 10:printf("Jack\t\t");break;
+      case 11:printf("Jack\t\t");break;
+      case 12:printf("Queen\t\t");break;
+      case 13:printf("King\t\t");break;
+      case 14:printf("Ace\t\t");break;
+  }
+
+  switch(suit)
+  {
+      case 1:printf("Hearts\t\t");break;
+      case 2:printf("Diamonds\t");break;
+      case 3:printf("Clubs\t\t");break;
+      case 4:printf("Spades\t\t");break;
+  }
+  printf("%d\n", player);
 }
 
 int random(int n)
