@@ -176,6 +176,16 @@ void temp_translate(int counter, int face, int suit, int player, int trump_suit)
       case 12:printf("Queen\t\t");break;
       case 13:printf("King\t\t");break;
       case 14:printf("Ace\t\t");break;
+      /*IN CASE OF TRUMP CARD*/
+      case 15:printf("Six\t\t");break;
+      case 16:printf("Seven\t\t");break;
+      case 17:printf("Eight\t\t");break;
+      case 18:printf("Ten\t\t");break;
+      case 19:printf("Jack\t\t");break;
+      case 20:printf("Jack\t\t");break;
+      case 21:printf("Queen\t\t");break;
+      case 22:printf("King\t\t");break;
+      case 23:printf("Ace\t\t");break;
   }
 
   switch(suit)
@@ -389,8 +399,11 @@ void set_trump_suit(void)
        if(card_deck[counter][1] == rand_number)
        {
          card_deck[counter][3] = 1;
+         card_deck[counter][0] += 9;
        }
+
    }
+
 }
 
 void counter_turn(int player_id)
@@ -418,22 +431,38 @@ void counter_turn(int player_id)
 
      for(search_counter = 0;search_counter < 36;search_counter++)
      {
-         if(card_deck[search_counter][0] < min_card && card_deck[search_counter][0] > card_deck[card_to_beat_id][0] && card_deck[search_counter][1] == card_deck[card_to_beat_id][1] && card_deck[search_counter][2] == player_id)
+         /*FIRSTLY SEARCH NOT TRUMP CARD TO BEAT*/
+         if(card_deck[search_counter][0] < min_card && card_deck[search_counter][0] > card_deck[card_to_beat_id][0]
+            && card_deck[search_counter][1] == card_deck[card_to_beat_id][1] &&
+            card_deck[search_counter][2] == player_id
+            && card_deck[search_counter][3] != 1)
          {
             min_card_id = search_counter;
             min_card = card_deck[min_card_id][0];
+
+            /*IF THERE ARE NO CARD TO BEAT - SEARCH THE SMALLEST TRUMP CARD*/
+            if(min_card_id == 0 && min_card == 100)
+            {
+                printf("OOOPS BEATING WITH TRUMP CARD\n");
+              if(card_deck[search_counter][0] < min_card && card_deck[search_counter][0] > card_deck[card_to_beat_id][0]
+                  && card_deck[search_counter][1] == card_deck[card_to_beat_id][1]
+                  && card_deck[search_counter][2] == player_id)
+              {
+                min_card_id = search_counter;
+                min_card = card_deck[min_card_id][0];
+              }
+            }
          }
      }
-    //turn_array_counter++;
-    turn_array[turn_array_counter] = min_card_id;
-    printf("BEAT %d WITH %d\n", card_to_beat_id, min_card_id);
-    min_card_id = 0;
-    min_card = 100;
+     turn_array[turn_array_counter] = min_card_id;
+     //card_deck[min_card_id][2] = 10;
+     printf("BEAT %d WITH %d\n", card_to_beat_id, min_card_id);
+     min_card_id = 0;
+     min_card = 100;
+     turn_array_counter++;
   }
 
 }
-
-
 
 int random(int n)
 {
