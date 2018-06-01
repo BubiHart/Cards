@@ -3,9 +3,21 @@
 
 void greetings(void);
 void game(void);
-void initialize_deck(void);
-void translate(int counter, int face, int suit, int player);
+void initialize_deck(int players_amount);
+void set_trump_suit(void);
+void initialize_player_list(int players_amount);
+void translate(int face, int suit);
+void temp_translate(int counter, int face, int suit, int player, int trump_suit);
+void turn_manage(int players_amount);
+void temp_turn_manage(int players_amount);
+void find_min_card(int player_id);
+void counter_turn(int player_id);
+
 int random(int n);
+
+int card_deck[36][4];
+int temp_player_array[4];
+int turn_array[36];
 
 int main()
 {
@@ -26,29 +38,34 @@ void greetings(void)
 
 void game(void)
 {
-    initialize_deck();
+    int players_amount = 0;
+
+    printf("Enter number of players: ");
+    scanf("%d", &players_amount);
+
+
+    initialize_deck(players_amount);
+    //turn_manage(players_amount);
+    temp_turn_manage(players_amount);
 }
 
-void initialize_deck(void)
+void initialize_deck(int players_amount)
 {
     system("cls");
     srand(time(NULL));
 
     int rand_min = 0;
     int rand_max = 35;
-    int players_amount = 0;
     int counter = 0;
     int card = 6;
     int suit = 0;
     int counter_player_cards = 0;
     int card_per_player = 0;
     int rand_number = 0;
-    int card_deck[36][3];
 
-    printf("Enter number of players: ");
-    scanf("%d", &players_amount);
 
     card_per_player = 36 / players_amount;
+
 
 
     for(counter = 0; counter < 36;counter++)
@@ -92,15 +109,57 @@ void initialize_deck(void)
        }
 
    }
+
+   set_trump_suit();
+
     for(counter = 0;counter < 36;counter++)
     {
-        translate(counter, card_deck[counter][0], card_deck[counter][1], card_deck[counter][2]);
+        //printf("%d\t%d\t%d\t%d\n", counter, card_deck[counter][0], card_deck[counter][1], card_deck[counter][2]);
+        //printf("\n");
+        temp_translate(counter, card_deck[counter][0], card_deck[counter][1], card_deck[counter][2], card_deck[counter][3]);
     }
 
 
 }
 
-void translate(int counter, int face, int suit, int player)
+void initialize_player_list(int players_amount)
+{
+  int counter = 0;
+  int players_list[players_amount];
+
+
+  for(counter = 0;counter < players_amount;counter++)
+  {
+       players_list[counter] = 1;
+  }
+
+}
+
+void translate(int face, int suit)
+{
+  switch(face)
+  {
+      case 6:printf("Six\t\t");break;
+      case 7:printf("Seven\t\t");break;
+      case 8:printf("Eight\t\t");break;
+      case 9:printf("Ten\t\t");break;
+      case 10:printf("Jack\t\t");break;
+      case 11:printf("Jack\t\t");break;
+      case 12:printf("Queen\t\t");break;
+      case 13:printf("King\t\t");break;
+      case 14:printf("Ace\t\t");break;
+  }
+
+  switch(suit)
+  {
+      case 1:printf("Hearts\t\t");break;
+      case 2:printf("Diamonds\t");break;
+      case 3:printf("Clubs\t\t");break;
+      case 4:printf("Spades\t\t");break;
+  }
+}
+
+void temp_translate(int counter, int face, int suit, int player, int trump_suit)
 {
 
 
@@ -125,8 +184,240 @@ void translate(int counter, int face, int suit, int player)
       case 3:printf("Clubs\t\t");break;
       case 4:printf("Spades\t\t");break;
   }
-  printf("%d\n", player);
+  printf("%d\t", player);
+
+  printf("%d\n", trump_suit);
 }
+
+void turn_manage(int players_amount)
+{
+  int attacker_id = 0;
+  int defender_id = 0;
+  int turn_counter = 0;
+  int counter = 0;
+  int players_in_game_counter = 0;
+  int players_list[players_amount];
+
+
+  for(counter = 1;counter <= players_amount;counter++)
+  {
+     players_list[counter] = 1;
+  }
+
+  //players_list[players_amount - 1] = 0;
+
+  for(turn_counter = 1;turn_counter <= players_amount;turn_counter++)
+  {
+      players_in_game_counter = 0;
+      /*CHECK HOW MANY PLAYERS ARE IN GAME*/
+
+      for(counter = 0;counter < players_amount;counter++)
+      {
+
+        if(players_list[counter] != 0)
+        {
+            players_in_game_counter++;
+        }
+      }
+
+
+
+       /*IF THERE ARE MORE THAN 1 PLAYER CONTINUE GAME*/
+      if(players_in_game_counter > 1)
+      {
+
+        if(turn_counter == players_amount)
+        {
+          attacker_id = turn_counter;
+          turn_counter = 0;
+          defender_id = turn_counter + 1;
+          printf("Player %d on Player %d\n", attacker_id, defender_id);
+        }
+        else
+        {
+            attacker_id = turn_counter;
+            defender_id = turn_counter + 1;
+
+            printf("Player %d on Player %d\n", attacker_id, defender_id);
+        }
+      }
+      else
+      {
+          printf("GAME OVER");
+          break;
+      }
+
+  }
+
+  find_min_card(attacker_id);
+
+}
+
+void find_min_card(int player_id)
+{
+  int min_card_id = 0;
+  int min_card = 100;
+  int min_card_suit = 0;
+  int counter = 0;
+  int temp_player_array_counter = 0;
+
+
+  for(counter = 0;counter < 4;counter++)
+  {
+     temp_player_array[counter] = 0;
+  }
+
+  /*GET ID OF THE SMALLEST CARD*/
+  for(counter = 0;counter < 36;counter++)
+  {
+      if(card_deck[counter][0] <= min_card && card_deck[counter][2] == player_id)
+      {
+        min_card_id = counter;
+        min_card = card_deck[min_card_id][0];
+      }
+
+  }
+
+  /*SEARCH FOR PLAYERS CARD WHICH HP ARE THE SAME AS THE SMALLEST AND FULLFIL TEMP PLAYER'S ARRAY*/
+  for(counter = 0;counter < 36;counter++)
+  {
+      if(card_deck[counter][0] == card_deck[min_card_id][0] && card_deck[counter][2] == player_id)
+      {
+        temp_player_array[temp_player_array_counter] = counter;
+        temp_player_array_counter++;
+      }
+  }
+
+  for(counter = 0;counter < 4;counter++)
+  {
+      printf("player_array[%d] = %d\n", counter, temp_player_array[counter]);
+  }
+
+
+  //printf("Min card for Player %d is %d\n", player_id, card_deck[min_card_id][0]);
+}
+
+void temp_turn_manage(int players_amount)
+{
+  int attacker_id = 0;
+  int defender_id = 0;
+  int turn_counter = 0;
+  int counter = 0;
+  int players_in_game_counter = 8;
+  int players_list[players_amount];
+  int turn_array_counter = 0;
+
+  for(counter = 0;counter < 12;counter++)
+  {
+      turn_array[counter] = 0;
+  }
+
+  for(counter = 1;counter <= players_amount;counter++)
+  {
+     players_list[counter] = 1;
+  }
+
+  //players_list[players_amount - 1] = 0;
+
+  for(turn_counter = 1;turn_counter <= players_amount;turn_counter++)
+  {
+      players_in_game_counter--;
+      /*CHECK HOW MANY PLAYERS ARE IN GAME*/
+      /*
+      for(counter = 0;counter < players_amount;counter++)
+      {
+
+        if(players_list[counter] != 0)
+        {
+            players_in_game_counter++;
+        }
+      }
+      */
+
+
+
+       /*IF THERE ARE MORE THAN 1 PLAYER CONTINUE GAME*/
+      if(players_in_game_counter > 1)
+      {
+
+        if(turn_counter == players_amount)
+        {
+          attacker_id = turn_counter;
+          turn_counter = 0;
+          defender_id = turn_counter + 1;
+          printf("Player %d on Player %d\n", attacker_id, defender_id);
+        }
+        else
+        {
+            attacker_id = turn_counter;
+            defender_id = turn_counter + 1;
+
+            printf("Player %d on Player %d\n", attacker_id, defender_id);
+        }
+        find_min_card(attacker_id);
+        for(counter = 0;counter < 4;counter++)
+        {
+          turn_array[counter] = temp_player_array[counter];
+          temp_player_array[counter] = 0;
+          //turn_array[turn_array_counter] = temp_player_array[counter];
+          //temp_player_array[counter] = 0;
+          //turn_array_counter++;
+        }
+
+        counter_turn(defender_id);
+        for(counter = 0;counter < 12;counter++)
+        {
+          printf("turn_array[%d] = %d\n", counter, turn_array[counter]);
+        }
+
+        for(counter = 0;counter < 12;counter++)
+        {
+          turn_array[counter] = 0;
+
+        }
+
+
+      }
+      else
+      {
+          printf("GAME OVER");
+          break;
+      }
+
+  }
+
+
+
+}
+
+void set_trump_suit(void)
+{
+   int counter = 0;
+   int rand_number = 0;
+   int rand_min = 1;
+   int rand_max = 4;
+   srand(time(NULL));
+
+   rand_number = random(rand_max-rand_min+1) + rand_min;
+
+   for(counter = 0;counter < 36;counter++)
+   {
+       card_deck[counter][3] = 0;
+
+       if(card_deck[counter][1] == rand_number)
+       {
+         card_deck[counter][3] = 1;
+       }
+   }
+}
+
+void counter_turn(int player_id)
+{
+  int counter = 0;
+
+}
+
+
 
 int random(int n)
 {
