@@ -16,8 +16,9 @@ void counter_turn(int player_id);
 int random(int n);
 
 int card_deck[36][4];
-int temp_player_array[4];
-int turn_array[36];
+int turn_array[12];
+
+int turn_array_counter = 0;
 
 int main()
 {
@@ -262,11 +263,6 @@ void find_min_card(int player_id)
   int temp_player_array_counter = 0;
 
 
-  for(counter = 0;counter < 4;counter++)
-  {
-     temp_player_array[counter] = 0;
-  }
-
   /*GET ID OF THE SMALLEST CARD*/
   for(counter = 0;counter < 36;counter++)
   {
@@ -278,19 +274,15 @@ void find_min_card(int player_id)
 
   }
 
+  turn_array_counter = 0;
   /*SEARCH FOR PLAYERS CARD WHICH HP ARE THE SAME AS THE SMALLEST AND FULLFIL TEMP PLAYER'S ARRAY*/
   for(counter = 0;counter < 36;counter++)
   {
       if(card_deck[counter][0] == card_deck[min_card_id][0] && card_deck[counter][2] == player_id)
       {
-        temp_player_array[temp_player_array_counter] = counter;
-        temp_player_array_counter++;
+        turn_array[turn_array_counter] = counter;
+        turn_array_counter++;
       }
-  }
-
-  for(counter = 0;counter < 4;counter++)
-  {
-      printf("player_array[%d] = %d\n", counter, temp_player_array[counter]);
   }
 
 
@@ -303,9 +295,9 @@ void temp_turn_manage(int players_amount)
   int defender_id = 0;
   int turn_counter = 0;
   int counter = 0;
-  int players_in_game_counter = 8;
+  int players_in_game_counter = 4;
   int players_list[players_amount];
-  int turn_array_counter = 0;
+
 
   for(counter = 0;counter < 12;counter++)
   {
@@ -355,26 +347,16 @@ void temp_turn_manage(int players_amount)
             printf("Player %d on Player %d\n", attacker_id, defender_id);
         }
         find_min_card(attacker_id);
-        for(counter = 0;counter < 4;counter++)
-        {
-          turn_array[counter] = temp_player_array[counter];
-          temp_player_array[counter] = 0;
-          //turn_array[turn_array_counter] = temp_player_array[counter];
-          //temp_player_array[counter] = 0;
-          //turn_array_counter++;
-        }
-
         counter_turn(defender_id);
+
         for(counter = 0;counter < 12;counter++)
         {
           printf("turn_array[%d] = %d\n", counter, turn_array[counter]);
-        }
-
-        for(counter = 0;counter < 12;counter++)
-        {
           turn_array[counter] = 0;
-
         }
+
+
+
 
 
       }
@@ -414,6 +396,40 @@ void set_trump_suit(void)
 void counter_turn(int player_id)
 {
   int counter = 0;
+  int search_counter = 0;
+  int min_card = 100;
+  int min_card_id = 0;
+  int card_to_beat_id = 0;
+
+
+  for(counter = 0;counter < 4;counter++)
+  {
+     card_to_beat_id = turn_array[counter];
+     if(counter > 0 && card_to_beat_id == 0)
+     {
+         printf("False call 0\n");
+         break;
+     }
+     if(card_deck[card_to_beat_id][2] == player_id)
+     {
+         printf("False call BEAT CARD\n");
+         break;
+     }
+
+     for(search_counter = 0;search_counter < 36;search_counter++)
+     {
+         if(card_deck[search_counter][0] < min_card && card_deck[search_counter][0] > card_deck[card_to_beat_id][0] && card_deck[search_counter][1] == card_deck[card_to_beat_id][1] && card_deck[search_counter][2] == player_id)
+         {
+            min_card_id = search_counter;
+            min_card = card_deck[min_card_id][0];
+         }
+     }
+    //turn_array_counter++;
+    turn_array[turn_array_counter] = min_card_id;
+    printf("BEAT %d WITH %d\n", card_to_beat_id, min_card_id);
+    min_card_id = 0;
+    min_card = 100;
+  }
 
 }
 
