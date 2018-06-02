@@ -1,5 +1,6 @@
 # depslib dependency file v1.0
-1527949749 source:z:\src\cards\main.c
+1527961871 source:z:\src\cards\main.c
 	<stdio.h>
+	<time.h>
 	<stdlib.h>
 

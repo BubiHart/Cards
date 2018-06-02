@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <time.h>
 #include <stdlib.h>
 
 void greetings(void);
@@ -14,9 +15,9 @@ void temp_turn_manage(int players_amount);
 void find_min_card(int player_id);
 void make_additional_attack(int defender_id, int card_restriction);
 int count_players_cards(int player_id);
-void counter_turn(int player_id);
-
+void counter_turn(int defender_id, int attacker_id);
 int random(int n);
+void delay(int number_of_seconds);
 
 int card_deck[36][4];
 int turn_array[6];
@@ -116,12 +117,15 @@ void initialize_deck(int players_amount)
 
    set_trump_suit();
 
+   full_translate();
+    /*
     for(counter = 0;counter < 36;counter++)
     {
         //printf("%d\t%d\t%d\t%d\n", counter, card_deck[counter][0], card_deck[counter][1], card_deck[counter][2]);
         //printf("\n");
         temp_translate(counter, card_deck[counter][0], card_deck[counter][1], card_deck[counter][2], card_deck[counter][3]);
     }
+    */
 
 
 
@@ -299,6 +303,7 @@ void find_min_card(int player_id)
         turn_array_counter++;
         card_deck[counter][2] = 11;
       }
+
   }
 
 
@@ -312,18 +317,22 @@ void temp_turn_manage(int players_amount)
   int turn_counter = 0;
   int card_to_beat_id = 0;
   int beaten_card_id = 0;
+  int player_id = 0;
   int counter = 0;
-  int players_in_game_counter = 3;
+  int cards_on_hand = 0;
+  int players_in_game_counter = 0;
   int free_space = 0;
   int amount_to_make_move = 0;
   int card_move_restriction = 0;
   int players_list[players_amount];
 
 
+  /*
   for(counter = 0;counter < 12;counter++)
   {
       turn_array[counter] = 0;
   }
+  */
 
   for(counter = 1;counter <= players_amount;counter++)
   {
@@ -334,7 +343,25 @@ void temp_turn_manage(int players_amount)
 
   for(turn_counter = 1;turn_counter <= players_amount;turn_counter++)
   {
-      players_in_game_counter--;
+      players_in_game_counter = players_amount;
+      for(counter = 1;counter <= players_amount;counter++)
+      {
+        player_id = counter;
+        cards_on_hand = count_players_cards(player_id);
+        if(cards_on_hand == 0)
+        {
+            printf("Player %d is out\n", player_id);
+            players_list[counter] = 0;
+            players_in_game_counter--;
+        }
+
+        if(players_list[counter] == 0)
+        {
+            players_in_game_counter--;
+        }
+      }
+
+
       /*CHECK HOW MANY PLAYERS ARE IN GAME*/
       /*
       for(counter = 0;counter < players_amount;counter++)
@@ -364,41 +391,66 @@ void temp_turn_manage(int players_amount)
         {
             attacker_id = turn_counter;
             defender_id = turn_counter + 1;
-
             printf("Player %d on Player %d\n", attacker_id, defender_id);
         }
 
         find_min_card(attacker_id);
-        counter_turn(defender_id);
+        counter_turn(defender_id, attacker_id);
 
-        /*CALCULATING CARD RESTRICTION FOR ADDITIONAL ATTACK*/
         free_space = (12 - turn_array_counter)/2;
 
         amount_to_make_move = count_players_cards(defender_id);
 
         if(amount_to_make_move >= free_space)
-        {
-            card_move_restriction = free_space;
-        }
+            {
+                card_move_restriction = free_space;
+            }
 
-        if(free_space > amount_to_make_move)
-        {
-            card_move_restriction = amount_to_make_move;
-        }
+            if(free_space > amount_to_make_move)
+            {
+                card_move_restriction = amount_to_make_move;
+            }
 
-        make_additional_attack(defender_id, card_move_restriction);
-        counter_turn(defender_id);
+            make_additional_attack(defender_id, card_move_restriction);
+            counter_turn(defender_id, attacker_id);
+
+        /*CALCULATING CARD RESTRICTION FOR ADDITIONAL ATTACK*/
+        /*
+        do
+        {
+           free_space = (12 - turn_array_counter)/2;
+
+           amount_to_make_move = count_players_cards(defender_id);
+
+           if(amount_to_make_move >= free_space)
+            {
+                card_move_restriction = free_space;
+            }
+
+            if(free_space > amount_to_make_move)
+            {
+                card_move_restriction = amount_to_make_move;
+            }
+
+            make_additional_attack(defender_id, card_move_restriction);
+            counter_turn(defender_id, attacker_id);
+        }while(card_move_restriction > 0);
+          */
 
         full_translate();
 
+        printf("DELAY\n");
+        delay(1);
+        system("cls");
 
-        printf("PLAYER %d |AMOUNT OF CARDS IN HAND - %d\n", defender_id, amount_to_make_move);
 
-        printf("BUSY - %d;FREE - %d\n", turn_array_counter, free_space);
+        //printf("PLAYER %d |AMOUNT OF CARDS IN HAND - %d\n", defender_id, amount_to_make_move);
+
+        //printf("BUSY - %d;FREE - %d\n", turn_array_counter, free_space);
 
         for(counter = 0;counter < 12;counter++)
         {
-          printf("turn_array[%d] = %d\n", counter, turn_array[counter]);
+          //printf("turn_array[%d] = %d\n", counter, turn_array[counter]);
           beaten_card_id = turn_array[counter];
           card_deck[beaten_card_id][2] = 0;
           turn_array[counter] = 0;
@@ -427,6 +479,7 @@ void set_trump_suit(void)
 
    rand_number = random(rand_max-rand_min+1) + rand_min;
 
+
    for(counter = 0;counter < 36;counter++)
    {
        card_deck[counter][3] = 0;
@@ -441,12 +494,13 @@ void set_trump_suit(void)
 
 }
 
-void counter_turn(int player_id)
+void counter_turn(int defender_id, int attacker_id)
 {
   int counter = 0;
   int search_counter = 0;
   int min_card = 100;
   int min_card_id = 0;
+  int card_id = 0;
   int card_to_beat_id = 0;
 
 
@@ -459,57 +513,51 @@ void counter_turn(int player_id)
      if(card_deck[card_to_beat_id][2] == 11)
      {
 
-        /*
-       if(counter > 0 && card_to_beat_id == 0)
-         {
-             printf("False call 0\n");
-             break;
-         }
-         if(card_deck[card_to_beat_id][2] == player_id)
-         {
-             printf("False call BEAT CARD\n");
-             break;
-         }
-
-
-         if(card_deck[card_to_beat_id][2] == 10 || card_deck[card_to_beat_id][2] == 0)
-         {
-             printf("10 PLAYER or 0 PLAYER\n");
-             break;
-         }
-         */
-
-
-
          for(search_counter = 0;search_counter < 36;search_counter++)
          {
              /*FIRSTLY SEARCH NOT TRUMP CARD TO BEAT*/
+             /*IF THERE ARE NO CARD TO BEAT - SEARCH THE SMALLEST TRUMP CARD*/
              if(card_deck[search_counter][0] < min_card && card_deck[search_counter][0] > card_deck[card_to_beat_id][0]
                 && card_deck[search_counter][1] == card_deck[card_to_beat_id][1] &&
-                card_deck[search_counter][2] == player_id
-                && card_deck[search_counter][3] != 1)
+                card_deck[search_counter][2] == defender_id
+                && card_deck[search_counter][3] == 0)
              {
                 min_card_id = search_counter;
                 min_card = card_deck[min_card_id][0];
+             }
 
-                /*IF THERE ARE NO CARD TO BEAT - SEARCH THE SMALLEST TRUMP CARD*/
-                if(min_card_id == 0 && min_card == 100)
-                {
-                    printf("OOOPS BEATING WITH TRUMP CARD\n");
+             if(counter == 36 && min_card == 100 && min_card_id == 0)
+             {
+                 for(search_counter = 0;counter < 36;counter++)
+                 {
                   if(card_deck[search_counter][0] < min_card && card_deck[search_counter][0] > card_deck[card_to_beat_id][0]
-                      && card_deck[search_counter][1] == card_deck[card_to_beat_id][1]
-                      && card_deck[search_counter][2] == player_id)
+                   && card_deck[search_counter][1] == card_deck[card_to_beat_id][1]
+                   && card_deck[search_counter][2] == defender_id && card_deck[search_counter][3] == 1)
                   {
                     min_card_id = search_counter;
                     min_card = card_deck[min_card_id][0];
+
                   }
-                }
+                 }
+
              }
+
+             /*
+             else if(min_card == 100 && min_card_id == 0)
+             {
+              printf("Ooops.Can't beat\n");
+              for(counter = 0;counter < turn_array_counter;counter++)
+              {
+                 card_id = turn_array[counter];
+                 card_deck[card_id][2] = defender_id;
+              }
+             }
+             */
          }
          turn_array[turn_array_counter] = min_card_id;
          card_deck[card_to_beat_id][2] = 10;
          card_deck[min_card_id][2] = 10;
-         printf("BEAT %d WITH %d\n", card_to_beat_id, min_card_id);
+         printf("BEAT %d WITH %d%\n", card_to_beat_id, min_card_id);
          min_card_id = 0;
          min_card = 100;
          turn_array_counter++;
@@ -610,5 +658,14 @@ int count_players_cards(int player_id)
 int random(int n)
 {
     return rand() % n;
+}
+
+void delay(int number_of_seconds)
+{
+    int milli_seconds = 1000 * number_of_seconds;
+
+    clock_t start_time = clock();
+
+    while (clock() < start_time + milli_seconds);
 }
 
