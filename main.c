@@ -326,10 +326,12 @@ void temp_turn_manage(int players_amount)
   int card_move_restriction = 0;
   int players_list[players_amount];
 
-  for(counter = 1;counter <= players_amount;counter++)
+  for(counter = 0;counter <= players_amount;counter++)
   {
      players_list[counter] = 1;
   }
+
+  players_list[0] = 0;
 
 
   //players_list[players_amount - 1] = 0;
@@ -341,6 +343,7 @@ void temp_turn_manage(int players_amount)
       {
         player_id = counter;
         cards_on_hand = count_players_cards(player_id);
+        //printf("PLAYER ID:%d\nCARDS ON HAND:%d\n", player_id, cards_on_hand);
         if(cards_on_hand == 0)
         {
             printf("Player %d is out\n", player_id);
@@ -348,10 +351,6 @@ void temp_turn_manage(int players_amount)
             players_in_game_counter--;
         }
 
-        if(players_list[counter] == 0)
-        {
-            players_in_game_counter--;
-        }
       }
 
 
@@ -367,7 +366,7 @@ void temp_turn_manage(int players_amount)
       }
       */
 
-
+       //printf("PLAYERS IN GAME: %d\n", players_in_game_counter);
 
        /*IF THERE ARE MORE THAN 1 PLAYER CONTINUE GAME*/
       if(players_in_game_counter > 1)
@@ -379,12 +378,14 @@ void temp_turn_manage(int players_amount)
           turn_counter = 0;
           defender_id = turn_counter + 1;
           printf("Player %d on Player %d\n", attacker_id , defender_id);
+          delay(3);
         }
         else
         {
             attacker_id = turn_counter;
             defender_id = turn_counter + 1;
             printf("Player %d on Player %d\n", attacker_id, defender_id);
+            delay(3);
         }
 
         find_min_card(attacker_id);
