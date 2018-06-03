@@ -343,7 +343,6 @@ void temp_turn_manage(int players_amount)
       {
         player_id = counter;
         cards_on_hand = count_players_cards(player_id);
-        //printf("PLAYER ID:%d\nCARDS ON HAND:%d\n", player_id, cards_on_hand);
         if(cards_on_hand == 0)
         {
             printf("Player %d is out\n", player_id);
@@ -354,23 +353,22 @@ void temp_turn_manage(int players_amount)
       }
 
 
-      /*CHECK HOW MANY PLAYERS ARE IN GAME*/
-      /*
-      for(counter = 0;counter < players_amount;counter++)
-      {
-
-        if(players_list[counter] != 0)
-        {
-            players_in_game_counter++;
-        }
-      }
-      */
-
-       //printf("PLAYERS IN GAME: %d\n", players_in_game_counter);
 
        /*IF THERE ARE MORE THAN 1 PLAYER CONTINUE GAME*/
       if(players_in_game_counter > 1)
       {
+        if(players_list[turn_counter] == 0)
+        {
+             do
+             {
+               turn_counter++;
+               if(turn_counter == players_amount && players_list[turn_counter] == 0)
+               {
+                  turn_counter = 1;
+               }
+             }
+             while(players_list[turn_counter] == 0);
+        }
 
         if(turn_counter == players_amount)
         {
