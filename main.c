@@ -2,22 +2,20 @@
 #include <time.h>
 #include <stdlib.h>
 
-void greetings(void);
 void game(void);
 void initialize_deck(int players_amount);
 void set_trump_suit(void);
-void initialize_player_list(int players_amount);
-void full_translate(void);
-void translate(int face, int suit);
-void temp_translate(int counter, int face, int suit, int player, int trump_suit);
+void translate(void);
 void turn_manage(int players_amount);
-void temp_turn_manage(int players_amount);
-void find_min_card(int player_id);
+void make_attack(int player_id);
 void make_additional_attack(int defender_id, int card_restriction);
 int count_players_cards(int player_id);
-void counter_turn(int defender_id, int attacker_id);
+void counter_attack(int defender_id, int attacker_id);
+void game_description(void);
+void action_menu(void);
 int random(int n);
 void delay(int number_of_seconds);
+void repeat_program(void);
 
 int card_deck[36][4];
 int turn_array[6];
@@ -26,32 +24,41 @@ int turn_array_counter = 0;
 
 int main()
 {
-  greetings();
-}
-
-void greetings(void)
-{
     int choice = 0;
-    printf("1.Play\n");
-    scanf("%d", &choice);
 
-    switch(choice)
-    {
-        case 1:game();break;
-    }
+    printf("Welcome!\n");
+    delay(1);
+    printf("Please choose action from list below\n");
+    delay(1);
+    action_menu();
 }
 
 void game(void)
 {
     int players_amount = 0;
 
-    printf("Enter number of players: ");
-    scanf("%d", &players_amount);
+    printf("Choose number of players\n");
+    printf("1. 2 Players\n");
+    printf("2. 3 Players\n");
+    printf("3. 4 Players\n");
+    printf("4. 6 Players\n");
+
+    if(scanf("%d", &players_amount) != 1 || players_amount < 2 || players_amount > 6 || players_amount == 5)
+    {
+        do
+        {
+            printf("Sorry. You can only choose 2, 3, 4, or 6 players");
+            fflush(stdin);
+        }
+        while(scanf("%d", &players_amount) != 1 || players_amount < 2 || players_amount > 6 || players_amount == 5);
+    }
+
+    printf("Let us begin!\n");
+    delay(1);
 
 
     initialize_deck(players_amount);
-    //turn_manage(players_amount);
-    temp_turn_manage(players_amount);
+    turn_manage(players_amount);
 }
 
 void initialize_deck(int players_amount)
@@ -117,161 +124,11 @@ void initialize_deck(int players_amount)
 
    set_trump_suit();
 
-   full_translate();
-    /*
-    for(counter = 0;counter < 36;counter++)
-    {
-        //printf("%d\t%d\t%d\t%d\n", counter, card_deck[counter][0], card_deck[counter][1], card_deck[counter][2]);
-        //printf("\n");
-        temp_translate(counter, card_deck[counter][0], card_deck[counter][1], card_deck[counter][2], card_deck[counter][3]);
-    }
-    */
-
-
-
+   translate();
 }
 
-void initialize_player_list(int players_amount)
-{
-  int counter = 0;
-  int players_list[players_amount];
 
-
-  for(counter = 0;counter < players_amount;counter++)
-  {
-       players_list[counter] = 1;
-  }
-
-}
-
-void translate(int face, int suit)
-{
-  switch(face)
-  {
-      case 6:printf("Six\t\t");break;
-      case 7:printf("Seven\t\t");break;
-      case 8:printf("Eight\t\t");break;
-      case 9:printf("Ten\t\t");break;
-      case 10:printf("Jack\t\t");break;
-      case 11:printf("Jack\t\t");break;
-      case 12:printf("Queen\t\t");break;
-      case 13:printf("King\t\t");break;
-      case 14:printf("Ace\t\t");break;
-  }
-
-  switch(suit)
-  {
-      case 1:printf("Hearts\t\t");break;
-      case 2:printf("Diamonds\t");break;
-      case 3:printf("Clubs\t\t");break;
-      case 4:printf("Spades\t\t");break;
-  }
-}
-
-void temp_translate(int counter, int face, int suit, int player, int trump_suit)
-{
-
-  printf("%d\t", counter);
-  switch(face)
-  {
-      case 6:printf("Six\t\t");break;
-      case 7:printf("Seven\t\t");break;
-      case 8:printf("Eight\t\t");break;
-      case 9:printf("Ten\t\t");break;
-      case 10:printf("Jack\t\t");break;
-      case 11:printf("Jack\t\t");break;
-      case 12:printf("Queen\t\t");break;
-      case 13:printf("King\t\t");break;
-      case 14:printf("Ace\t\t");break;
-      /*IN CASE OF TRUMP CARD*/
-      case 15:printf("Six\t\t");break;
-      case 16:printf("Seven\t\t");break;
-      case 17:printf("Eight\t\t");break;
-      case 18:printf("Ten\t\t");break;
-      case 19:printf("Jack\t\t");break;
-      case 20:printf("Jack\t\t");break;
-      case 21:printf("Queen\t\t");break;
-      case 22:printf("King\t\t");break;
-      case 23:printf("Ace\t\t");break;
-  }
-
-  switch(suit)
-  {
-      case 1:printf("Hearts\t\t");break;
-      case 2:printf("Diamonds\t");break;
-      case 3:printf("Clubs\t\t");break;
-      case 4:printf("Spades\t\t");break;
-  }
-  printf("%d\t", player);
-
-  printf("%d\n", trump_suit);
-}
-
-void turn_manage(int players_amount)
-{
-  int attacker_id = 0;
-  int defender_id = 0;
-  int turn_counter = 0;
-  int counter = 0;
-  int players_in_game_counter = 0;
-  int players_list[players_amount];
-
-
-  for(counter = 1;counter <= players_amount;counter++)
-  {
-     players_list[counter] = 1;
-  }
-
-  //players_list[players_amount - 1] = 0;
-
-  for(turn_counter = 1;turn_counter <= players_amount;turn_counter++)
-  {
-      players_in_game_counter = 0;
-      /*CHECK HOW MANY PLAYERS ARE IN GAME*/
-
-      for(counter = 0;counter < players_amount;counter++)
-      {
-
-        if(players_list[counter] != 0)
-        {
-            players_in_game_counter++;
-        }
-      }
-
-
-
-       /*IF THERE ARE MORE THAN 1 PLAYER CONTINUE GAME*/
-      if(players_in_game_counter > 1)
-      {
-
-        if(turn_counter == players_amount)
-        {
-          attacker_id = turn_counter;
-          turn_counter = 0;
-          defender_id = turn_counter + 1;
-          printf("Player %d on Player %d\n", attacker_id, defender_id);
-        }
-        else
-        {
-            attacker_id = turn_counter;
-            defender_id = turn_counter + 1;
-
-            printf("Player %d on Player %d\n", attacker_id, defender_id);
-        }
-      }
-      else
-      {
-          printf("GAME OVER");
-          break;
-      }
-
-  }
-
-  find_min_card(attacker_id);
-
-}
-
-void find_min_card(int player_id)
+void make_attack(int player_id)
 {
   int min_card_id = 0;
   int turn_array_card_id = 0;
@@ -310,7 +167,7 @@ void find_min_card(int player_id)
   //printf("Min card for Player %d is %d\n", player_id, card_deck[min_card_id][0]);
 }
 
-void temp_turn_manage(int players_amount)
+void turn_manage(int players_amount)
 {
   int attacker_id = 0;
   int defender_id = 0;
@@ -334,7 +191,6 @@ void temp_turn_manage(int players_amount)
   players_list[0] = 0;
 
 
-  //players_list[players_amount - 1] = 0;
 
   for(turn_counter = 1;turn_counter <= players_amount;turn_counter++)
   {
@@ -386,8 +242,8 @@ void temp_turn_manage(int players_amount)
             delay(3);
         }
 
-        find_min_card(attacker_id);
-        counter_turn(defender_id, attacker_id);
+        make_attack(attacker_id);
+        counter_attack(defender_id, attacker_id);
 
         free_space = (12 - turn_array_counter)/2;
 
@@ -404,23 +260,17 @@ void temp_turn_manage(int players_amount)
             }
 
             make_additional_attack(defender_id, card_move_restriction);
-            counter_turn(defender_id, attacker_id);
+            counter_attack(defender_id, attacker_id);
 
 
-        full_translate();
+        translate();
 
         printf("DELAY\n");
         delay(1);
         system("cls");
 
-
-        //printf("PLAYER %d |AMOUNT OF CARDS IN HAND - %d\n", defender_id, amount_to_make_move);
-
-        //printf("BUSY - %d;FREE - %d\n", turn_array_counter, free_space);
-
         for(counter = 0;counter < 12;counter++)
         {
-          //printf("turn_array[%d] = %d\n", counter, turn_array[counter]);
           beaten_card_id = turn_array[counter];
           card_deck[beaten_card_id][2] = 0;
           turn_array[counter] = 0;
@@ -430,7 +280,7 @@ void temp_turn_manage(int players_amount)
       else
       {
           printf("GAME OVER");
-          break;
+          repeat_program();
       }
 
   }
@@ -464,7 +314,7 @@ void set_trump_suit(void)
 
 }
 
-void counter_turn(int defender_id, int attacker_id)
+void counter_attack(int defender_id, int attacker_id)
 {
   int counter = 0;
   int search_counter = 0;
@@ -533,7 +383,7 @@ void counter_turn(int defender_id, int attacker_id)
 
 }
 
-void full_translate(void)
+void translate(void)
 {
     int counter = 0;
     for(counter = 0;counter < 36;counter++)
@@ -643,4 +493,85 @@ void delay(int number_of_seconds)
 
     while (clock() < start_time + milli_seconds);
 }
+
+void action_menu(void)
+{
+    int choice = 0;
+
+    printf("1.Play\n");
+    printf("2.Game description\n");
+    printf("3.Exit\n");
+
+    if(scanf("%d", &choice) != 1 || choice < 1 || choice > 3)
+    {
+       do
+       {
+         printf("Choose from 1 to 3\n");
+         fflush(stdin);
+       }
+        while(scanf("%d", &choice) != 1);
+    }
+
+     switch(choice)
+     {
+        case 1:game();break;
+        case 2:game_description();break;
+        case 3:exit(1);break;
+     }
+
+
+
+
+}
+
+void game_description(void)
+{
+    int choice = 0;
+
+    printf("Durak is a card game that is popular in post-Soviet states. The objective of the game is to get rid of all one's cards when there are no more cards left in the deck (see rules). At the end of the game, the last player with cards in their hand is the fool..\n");
+    printf("\nDo you want to return to previous menu, or exit?\n");
+    printf("1. Previous menu\n2. Exit from program\n");
+
+    if(scanf("%d", &choice) != 1 || choice < 1 || choice > 2)
+    {
+       do
+       {
+         printf("Choose from 1 to 2\n");
+         fflush(stdin);
+       }
+        while(scanf("%d", &choice) != 1 || choice < 1 || choice > 2);
+    }
+
+    switch(choice)
+    {
+        case 1:action_menu();break;
+        case 2:exit(1);break;
+    }
+}
+
+void repeat_program(void)
+{
+    int choice = 0;
+    system("cls");
+    printf("Whoa. Game over\nDo you want to run program one more time or to exit?\n");
+    printf("1. Repeat\n2. Exit\n");
+
+    if(scanf("%d", &choice) != 1 || choice < 1 || choice > 2)
+    {
+       do
+       {
+         printf("Choose from 1 to 2\n");
+         fflush(stdin);
+       }
+        while(scanf("%d", &choice) != 1 || choice < 1 || choice > 2);
+    }
+
+    switch(choice)
+    {
+        case 1:main();break;
+        case 2:exit(1);break;
+    }
+}
+
+
 
